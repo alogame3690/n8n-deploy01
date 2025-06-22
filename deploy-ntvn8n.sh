@@ -1,15 +1,16 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Đang cài Docker & Docker Compose..."
+echo "🚀 Dang cai Docker & Docker Compose..."
 apt update && apt install -y docker.io docker-compose
 
-echo "📁 Tạo thư mục dự án n8n..."
+echo "📁 Tao thu muc du an n8n..."
 mkdir -p /opt/n8n && cd /opt/n8n
 
-echo "📄 Tạo file docker-compose.yml..."
+echo "📄 Tao file docker-compose.yml..."
 cat > docker-compose.yml <<EOF
 version: "3.7"
+
 services:
   n8n:
     image: n8nio/n8n:1.66.0
@@ -29,19 +30,23 @@ volumes:
   n8n_data:
 EOF
 
-echo "🌍 Cài đặt Caddy reverse proxy đúng chuẩn..."
-apt install -y debian-keyring debian-archive-keyring apt-transport-https curl gnupg
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy.gpg
-curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy.list
+echo "🌐 Cai dat Caddy reverse proxy..."
+apt install -y debian-keyring debian-archive-keyring apt-transport-https curl gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
 apt update && apt install caddy -y
 
-echo "🔐 Ghi đè file cấu hình Caddyfile..."
+mkdir -p /etc/caddy
+
+echo "🛍 Cau hinh domain SSL cho n8n..."
 cat > /etc/caddy/Caddyfile <<EOF
 ntvn8n.xyz {
-  reverse_proxy 127.0.0.1:5678
+    reverse_proxy localhost:5678
 }
 EOF
 
-echo "🚀 Khởi động hệ thống n8n & Caddy..."
-docker-compose up -d
+echo "⏳ Khoi dong dich vu..."
+docker compose up -d
 systemctl restart caddy
+
+echo "✅ Hoan tat! Truy cap: https://ntvn8n.xyz voi user: admin / pass: n8n8n123"
